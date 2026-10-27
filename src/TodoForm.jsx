@@ -20,8 +20,10 @@ function TodoForm({ onAddTodo }) {
                 ref={inputRef}
                 type="text"
                 id="todoTitle"
+                name="todoTitle"
                 placeholder={'Todo text'}
-                required/>
+                required
+            />
             <button type="submit">Add Todo</button>
         </form>
     )
