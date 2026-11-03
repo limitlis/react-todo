@@ -6,7 +6,7 @@ function TodoList({ todoList, onCompleteTodo }) {
   });
   return (
     filteredTodoList?.length === 0 ?
-      'Add todo above to get started'
+      <p>Add todo above to get started</p>
       :
         <ul>
         {

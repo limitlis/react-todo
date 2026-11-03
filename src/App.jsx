@@ -20,7 +20,7 @@ function App() {
   function completeTodo(id) {
     if (!id) return;
     setTodoList(
-      todoList.map((todo, index) => {
+      todoList.map((todo) => {
         if (todo.id === id) {
           return {
             ...todo,
