@@ -33,7 +33,7 @@ function TodoListItem({ todo, onUpdateTodo, onCompleteTodo }) {
                         <button type='button' onClick={handleCancel}>Cancel</button>
                         <button
                             type='button'
-                            onClick={handleEdit}
+                            onClick={handleUpdate}
                             disabled={!isValidTodoTitle(workingTitle)}
                         >Update</button>
                     </>
