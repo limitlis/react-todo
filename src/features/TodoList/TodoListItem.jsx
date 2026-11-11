@@ -12,12 +12,6 @@ function TodoListItem({ todo, onUpdateTodo, onCompleteTodo }) {
         finishEdit
     } = useEditableTitle(todo.title);
 
-    function handleCancel() {
-        cancelEdit();
-    }
-    function handleEdit(event) {
-        updateTitle(event.target.value)
-    }
     function handleUpdate(event) {
         if (!isEditing) return;
         event.preventDefault();
@@ -29,8 +23,8 @@ function TodoListItem({ todo, onUpdateTodo, onCompleteTodo }) {
             <form onSubmit={handleUpdate}>
                 {isEditing ? (
                     <>
-                        <TextInputWithLabel value={workingTitle} onChange={handleEdit} />
-                        <button type='button' onClick={handleCancel}>Cancel</button>
+                        <TextInputWithLabel value={workingTitle} onChange={(event) => updateTitle(event.target.value)} />
+                        <button type='button' onClick={cancelEdit}>Cancel</button>
                         <button
                             type='button'
                             onClick={handleUpdate}
