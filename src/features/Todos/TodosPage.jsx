@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import TodoForm from './TodoForm.jsx';
 import TodoList from './TodoList/TodoList.jsx'
-import Header from '../../shared/Header.jsx';
 
 export default function TodosPage() {
 
@@ -43,7 +42,6 @@ export default function TodosPage() {
 
     return (
         <div>
-            <Header/>
             <TodoForm onAddTodo={addTodo} /> 
             <TodoList todoList={todoList} onUpdateTodo={updateTodo} onCompleteTodo={ completeTodo } />
         </div>

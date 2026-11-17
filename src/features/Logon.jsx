@@ -1,6 +1,6 @@
 import { useState } from 'react'
 
-export default function Logon({ onSetEmail = () => { }, onSetToken = () => { } }) {
+export default function Logon({ onSetEmail, onSetToken }) {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [authError, setAuthError] = useState('');
@@ -47,7 +47,13 @@ export default function Logon({ onSetEmail = () => { }, onSetToken = () => { } }
                 value={ password }
                 onChange={(e) => setPassword(e.target.value)}
             />
-            <button type="submit" disabled={ isLoggingOn }>{ isLoggingOn ? 'Logging in...' : 'Log On' }</button>
+            <button
+                type="submit"
+                aria-busy={isLoggingOn}
+                disabled={isLoggingOn}
+            >
+                { isLoggingOn ? 'Logging in...' : 'Log On' }
+            </button>
         </form>
     )
 }
