@@ -30,7 +30,7 @@ export default function Logon({ onSetEmail, onSetToken }) {
     }
     return (
         <form onSubmit={handleSubmit}>
-            { authError?.length > 0 ? <p>authError</p> : '' }
+            { authError?.length > 0 ? <div className="alert alert-error">authError</div> : '' }
             <label htmlFor='email'>Email</label>
             <input
                 type="email"
