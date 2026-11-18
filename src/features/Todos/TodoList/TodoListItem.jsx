@@ -1,7 +1,8 @@
 import { useState } from 'react';
-import TextInputWithLabel from '../../shared/TextInputWithLabel';
-import { isValidTodoTitle } from '../../utils/todoValidation';
-import { useEditableTitle } from '../../hooks/useEditableTitle';
+import TextInputWithLabel from '@/shared/TextInputWithLabel';
+import { isValidTodoTitle } from '@/utils/todoValidation';
+import { useEditableTitle } from '@/hooks/useEditableTitle';
+
 function TodoListItem({ todo, onUpdateTodo, onCompleteTodo }) {
     const {
         isEditing,
@@ -33,7 +34,7 @@ function TodoListItem({ todo, onUpdateTodo, onCompleteTodo }) {
                     </>
                 ) : (
                     <>
-                        <label>
+                        <label style={{display: 'inline'}}>
                             <input
                                 type="checkbox"
                                 id={`checkbox${todo.id}`}
@@ -41,7 +42,7 @@ function TodoListItem({ todo, onUpdateTodo, onCompleteTodo }) {
                                 onChange={() => onCompleteTodo(todo.id)}
                             />
                         </label>
-                        <span onClick={() => startEditing()}>{todo.title}</span>
+                            <span onClick={() => startEditing()} style={{ cursor: 'pointer'}}>{todo.title}</span>
                     </>
                 )}
             </form>
