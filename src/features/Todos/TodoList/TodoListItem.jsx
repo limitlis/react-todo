@@ -34,7 +34,7 @@ function TodoListItem({ todo, onUpdateTodo, onCompleteTodo }) {
                     </>
                 ) : (
                     <>
-                        <label>
+                        <label style={{display: 'inline'}}>
                             <input
                                 type="checkbox"
                                 id={`checkbox${todo.id}`}
@@ -42,7 +42,7 @@ function TodoListItem({ todo, onUpdateTodo, onCompleteTodo }) {
                                 onChange={() => onCompleteTodo(todo.id)}
                             />
                         </label>
-                        <span onClick={() => startEditing()}>{todo.title}</span>
+                            <span onClick={() => startEditing()} style={{ cursor: 'pointer'}}>{todo.title}</span>
                     </>
                 )}
             </form>

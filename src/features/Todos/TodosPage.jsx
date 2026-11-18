@@ -23,11 +23,15 @@ export default function TodosPage({ token }) {
                     },
                     credentials: 'include',
                 });
-                const { tasks, pagination } = await response.json();
-
-                setTodoList(tasks);
+                if (response.ok) {
+                    const { tasks, pagination } = await response.json();
+                    setTodoList(tasks);
+                } else {
+                    const errorBody = await response.json();
+                    throw new Error(errorBody.message);
+                }
             } catch (error) {
-                setError(error)
+                setError(error.message);
             } finally {
                 setIsTodoListLoading(false);
             }
@@ -49,7 +53,7 @@ export default function TodosPage({ token }) {
             setTodoList((previous) => [newTodo, ...previous]);
             try {
                 const { id, ...payload } = newTodo;
-                const createResponse = await fetch(`/api/tasks`, {
+                const response = await fetch(`/api/tasks`, {
                     method: 'POST',
                     body: JSON.stringify(payload),
                     headers: {
@@ -61,8 +65,8 @@ export default function TodosPage({ token }) {
                 }).catch((error) => {
                     throw new Error(error);
                 });
-                if (createResponse.ok) {
-                    const task = await createResponse.json();
+                if (response.ok) {
+                    const task = await response.json();
                     setTodoList((previous) => {
                         const previousResults = previous.filter((todo) => todo.id !== tmpID);
                         return [task, ...previousResults];

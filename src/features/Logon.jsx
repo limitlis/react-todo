@@ -30,13 +30,14 @@ export default function Logon({ onSetEmail, onSetToken }) {
     }
     return (
         <form onSubmit={handleSubmit}>
-            { authError?.length > 0 ? <div className="alert alert-error">authError</div> : '' }
+            { authError != '' ? <div className="alert alert-error"><p>{authError}</p></div> : '' }
             <label htmlFor='email'>Email</label>
             <input
                 type="email"
                 name="email"
                 id='email'
-                value={ email }
+                value={email}
+                required
                 onChange={(e) => setEmail(e.target.value)}
             />
             <label htmlFor='password'>Password</label>
@@ -44,7 +45,8 @@ export default function Logon({ onSetEmail, onSetToken }) {
                 type="password"
                 name='password'
                 id='password'
-                value={ password }
+                value={password}
+                required
                 onChange={(e) => setPassword(e.target.value)}
             />
             <button
