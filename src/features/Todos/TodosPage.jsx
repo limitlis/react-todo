@@ -27,8 +27,12 @@ export default function TodosPage({ token }) {
                     const { tasks, pagination } = await response.json();
                     setTodoList(tasks);
                 } else {
-                    const errorBody = await response.json();
-                    throw new Error(errorBody.message);
+                    if (response.status === 401) {
+                        throw new Error('unauthorized');
+                    } else {
+                        const errorBody = await response.json();
+                        throw new Error(errorBody.message);
+                    }
                 }
             } catch (error) {
                 setError(error.message);
