@@ -8,6 +8,7 @@ export default function Logon({ onSetEmail, onSetToken }) {
 
     async function handleSubmit(event) {
         event.preventDefault();
+        setIsLoggingOn(true);
         try{ 
             const response = await fetch('/api/users/logon', {
                 method: 'POST',
