@@ -1,15 +1,22 @@
 import { useEffect, useState } from 'react';
 import TodoForm from './TodoForm.jsx';
 import TodoList from './TodoList/TodoList.jsx'
-import SortBy from '../../shared/SortBy.jsx';
+import SortBy from '@/shared/SortBy.jsx';
+import useDebounce from '@/utils/useDebounce.js';
+import FilterInput from '@/shared/FilterInput.jsx';
 
 export default function TodosPage({ token }) {
     const [todoList, setTodoList] = useState([]);
     const [sortBy, setSortBy] = useState('createdAt');
     const [sortDirection, setSortDirection] = useState('desc');
 
+    const [filterTerm, setFilterTerm] = useState('');
+    const debouncedFilterTerm = useDebounce(filterTerm, 300); 
+
     const [error, setError] = useState('');
     const [isTodoListLoading, setIsTodoListLoading] = useState(false);
+
+    const handleFilterChange = (newTerm) => { setFilterTerm(newTerm); };
 
     useEffect(() => {
         if (!token) return;
@@ -17,11 +24,15 @@ export default function TodosPage({ token }) {
         (async function fetchTodos() {
             setIsTodoListLoading(true);
             try {
-                const params = new URLSearchParams({
+                const paramsObject = {
                     sortBy,
                     sortDirection,
                     limit: 100,
-                });
+                }
+                if (debouncedFilterTerm) {
+                   paramsObject.find = debouncedFilterTerm;
+                }
+                const params = new URLSearchParams(paramsObject);
                 const response = await fetch(`/api/tasks?${params}`, {
                     headers: {
                         'X-CSRF-TOKEN': token,
@@ -48,7 +59,7 @@ export default function TodosPage({ token }) {
         return () => {
             dataFetched = true;
         }
-    }, [token, sortBy, sortDirection]);
+    }, [token, sortBy, sortDirection, debouncedFilterTerm]);
     
     async function addTodo(todoTitle) {
         if (todoTitle?.length) {
@@ -181,7 +192,8 @@ export default function TodosPage({ token }) {
             </div> : ''
             }
             {isTodoListLoading ? <div aria-busy="true" style={{ minHeight: '2rem' }}></div> : ''}
-            <SortBy sortBy={sortBy} sortDirection={sortDirection} onSortByChange={setSortBy} onSortDirectionChange={setSortDirection}/>
+            <SortBy sortBy={sortBy} sortDirection={sortDirection} onSortByChange={setSortBy} onSortDirectionChange={setSortDirection} />
+            <FilterInput filterTerm={filterTerm} onFilterChange={handleFilterChange}/>
             <TodoForm onAddTodo={addTodo} /> 
             <TodoList todoList={todoList} onUpdateTodo={updateTodo} onCompleteTodo={completeTodo} />
         </div>
