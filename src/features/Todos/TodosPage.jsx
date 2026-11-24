@@ -1,10 +1,13 @@
 import { useEffect, useState } from 'react';
 import TodoForm from './TodoForm.jsx';
 import TodoList from './TodoList/TodoList.jsx'
+import SortBy from '../../shared/SortBy.jsx';
 
 export default function TodosPage({ token }) {
-
     const [todoList, setTodoList] = useState([]);
+    const [sortBy, setSortBy] = useState('createdAt');
+    const [sortDirection, setSortDirection] = useState('desc');
+
     const [error, setError] = useState('');
     const [isTodoListLoading, setIsTodoListLoading] = useState(false);
 
@@ -15,7 +18,9 @@ export default function TodosPage({ token }) {
             setIsTodoListLoading(true);
             try {
                 const params = new URLSearchParams({
-                    limit: 99,
+                    sortBy,
+                    sortDirection,
+                    limit: 100,
                 });
                 const response = await fetch(`/api/tasks?${params}`, {
                     headers: {
@@ -43,7 +48,7 @@ export default function TodosPage({ token }) {
         return () => {
             dataFetched = true;
         }
-    }, [token]);
+    }, [token, sortBy, sortDirection]);
     
     async function addTodo(todoTitle) {
         if (todoTitle?.length) {
@@ -175,7 +180,8 @@ export default function TodosPage({ token }) {
                 <button className="alert-close" aria-label="Close" onClick={() => setError('')}>&times;</button>
             </div> : ''
             }
-            { isTodoListLoading ? <div aria-busy="true" style={{minHeight: '2rem'}}></div> : '' }
+            {isTodoListLoading ? <div aria-busy="true" style={{ minHeight: '2rem' }}></div> : ''}
+            <SortBy sortBy={sortBy} sortDirection={sortDirection} onSortByChange={setSortBy} onSortDirectionChange={setSortDirection}/>
             <TodoForm onAddTodo={addTodo} /> 
             <TodoList todoList={todoList} onUpdateTodo={updateTodo} onCompleteTodo={completeTodo} />
         </div>
