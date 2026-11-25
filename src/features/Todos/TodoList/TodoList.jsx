@@ -6,7 +6,7 @@ function TodoList({ todoList, onUpdateTodo, onCompleteTodo, dataVersion }) {
     const todos = todoList.filter((todo) => {
       return !todo?.isCompleted;
     });
-    console.log(`"Recalculating filtered todos (v${dataVersion})"`);
+    // console.log(`"Recalculating filtered todos (v${dataVersion})"`);
     return {
       todos,
       version: dataVersion

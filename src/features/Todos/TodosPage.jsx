@@ -22,12 +22,13 @@ export default function TodosPage({ token }) {
     const [dataVersion, setDataVersion] = useState(0);
     
     const invalidateCache = useCallback(() => {
-        console.log("Invalidating memo cache after todo mutation");
+        // console.log("Invalidating memo cache after todo mutation");
         setDataVersion((prev) => prev + 1);
     }, []);
     useEffect(() => {
         if (!token) return;
-        let dataFetched = false;
+        // prefixing with `_` due to linter
+        let _dataFetched = false;
         (async function fetchTodos() {
             setIsTodoListLoading(true);
             try {
@@ -47,7 +48,8 @@ export default function TodosPage({ token }) {
                     credentials: 'include',
                 });
                 if (response.ok) {
-                    const { tasks, pagination } = await response.json();
+                    // prefixing pagination as `_pagination` due to linter
+                    const { tasks, _pagination } = await response.json();
                     setTodoList(tasks);
                 } else {
                     if (response.status === 401) {
@@ -68,7 +70,7 @@ export default function TodosPage({ token }) {
             }
         })();
         return () => {
-            dataFetched = true;
+            _dataFetched = true;
         }
     }, [token, sortBy, sortDirection, debouncedFilterTerm]);
     
@@ -83,6 +85,7 @@ export default function TodosPage({ token }) {
 
             setTodoList((previous) => [newTodo, ...previous]);
             try {
+                // oxlint-disable-next-line no-unused-vars
                 const { id, ...payload } = newTodo;
                 const response = await fetch(`/api/tasks`, {
                     method: 'POST',
@@ -218,7 +221,7 @@ export default function TodosPage({ token }) {
                 filterError != '' && <div className="alert alert-error">
                     <p>
                         {filterError}
-                        <a class="secondary" onClick={(e) => resetFilters(e)} style={{marginLeft: '10px'}}>Reset Filters</a>
+                        <a className="secondary" onClick={(e) => resetFilters(e)} style={{marginLeft: '10px'}}>Reset Filters</a>
                     </p>
                 <button className="alert-close" aria-label="Close" onClick={() => setFilterError('')}>&times;</button>
             </div>
