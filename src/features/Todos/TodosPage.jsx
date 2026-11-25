@@ -51,6 +51,7 @@ export default function TodosPage({ token }) {
                     // prefixing pagination as `_pagination` due to linter
                     const { tasks, _pagination } = await response.json();
                     setTodoList(tasks);
+                    setFilterError('');
                 } else {
                     if (response.status === 401) {
                         throw new Error('unauthorized');
