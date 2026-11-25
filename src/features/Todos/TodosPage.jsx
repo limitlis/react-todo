@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import TodoForm from './TodoForm.jsx';
 import TodoList from './TodoList/TodoList.jsx'
 import SortBy from '@/shared/SortBy.jsx';
@@ -18,6 +18,12 @@ export default function TodosPage({ token }) {
 
     const handleFilterChange = (newTerm) => { setFilterTerm(newTerm); };
 
+    const [dataVersion, setDataVersion] = useState(0);
+    
+    const invalidateCache = useCallback(() => {
+        console.log("Invalidating memo cache after todo mutation");
+        setDataVersion((prev) => prev + 1);
+    }, []);
     useEffect(() => {
         if (!token) return;
         let dataFetched = false;
@@ -91,6 +97,7 @@ export default function TodosPage({ token }) {
                         const previousResults = previous.filter((todo) => todo.id !== tmpID);
                         return [task, ...previousResults];
                     });
+                    invalidateCache();
                 } else {
                     const errorBody = await response.json();
                     throw new Error(errorBody.message);
@@ -131,6 +138,7 @@ export default function TodosPage({ token }) {
                 const errorBody = await response.json();
                 throw new Error(errorBody.message);
             }
+            invalidateCache();
             
         } catch (error) {
             setError(error.message);
@@ -171,6 +179,7 @@ export default function TodosPage({ token }) {
                 const errorBody = await response.json();
                 throw new Error(errorBody.message);
             }
+            invalidateCache();
         } catch (error) {
             setError(error.message);
             setTodoList(
@@ -195,7 +204,7 @@ export default function TodosPage({ token }) {
             <SortBy sortBy={sortBy} sortDirection={sortDirection} onSortByChange={setSortBy} onSortDirectionChange={setSortDirection} />
             <FilterInput filterTerm={filterTerm} onFilterChange={handleFilterChange}/>
             <TodoForm onAddTodo={addTodo} /> 
-            <TodoList todoList={todoList} onUpdateTodo={updateTodo} onCompleteTodo={completeTodo} />
+            <TodoList todoList={todoList} onUpdateTodo={updateTodo} onCompleteTodo={completeTodo} dataVersion={dataVersion} />
         </div>
     )
 }
