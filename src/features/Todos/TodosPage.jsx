@@ -14,6 +14,7 @@ export default function TodosPage({ token }) {
     const debouncedFilterTerm = useDebounce(filterTerm, 300); 
 
     const [error, setError] = useState('');
+    const [filterError, setFilterError] = useState('');
     const [isTodoListLoading, setIsTodoListLoading] = useState(false);
 
     const handleFilterChange = (newTerm) => { setFilterTerm(newTerm); };
@@ -57,7 +58,11 @@ export default function TodosPage({ token }) {
                     }
                 }
             } catch (error) {
-                setError(error.message);
+                if (debouncedFilterTerm || sortBy !== 'createdAt' || sortDirection !== 'desc') {
+                    setFilterError(`Error filtering/sorting todos: ${error.message}`);
+                } else {
+                    setError(`Error fetching todos: ${error.message}`);
+                }
             } finally {
                 setIsTodoListLoading(false);
             }
@@ -98,6 +103,7 @@ export default function TodosPage({ token }) {
                         return [task, ...previousResults];
                     });
                     invalidateCache();
+                    setFilterError('');
                 } else {
                     const errorBody = await response.json();
                     throw new Error(errorBody.message);
@@ -193,12 +199,29 @@ export default function TodosPage({ token }) {
         }
     }
 
+    function resetFilters(e) {
+        e.preventDefault();
+        setFilterTerm('');
+        setSortBy('createdAt');
+        setSortDirection('desc');
+        setFilterError('');
+    }
+
     return (
         <div>
             {   error !== '' ? <div className="alert alert-error">
                     <p>{error}</p>
                 <button className="alert-close" aria-label="Close" onClick={() => setError('')}>&times;</button>
             </div> : ''
+            }
+            {
+                filterError != '' && <div className="alert alert-error">
+                    <p>
+                        {filterError}
+                        <a class="secondary" onClick={(e) => resetFilters(e)} style={{marginLeft: '10px'}}>Reset Filters</a>
+                    </p>
+                <button className="alert-close" aria-label="Close" onClick={() => setFilterError('')}>&times;</button>
+            </div>
             }
             {isTodoListLoading ? <div aria-busy="true" style={{ minHeight: '2rem' }}></div> : ''}
             <SortBy sortBy={sortBy} sortDirection={sortDirection} onSortByChange={setSortBy} onSortDirectionChange={setSortDirection} />
