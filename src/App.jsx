@@ -6,7 +6,8 @@ import Logon from '@/features/Logon';
 import Header from '@/shared/Header';
 
 function App() {
-  const [email, setEmail] = useState('');
+  // prefixing `email` as `_email` due to linter
+  const [_email, setEmail] = useState('');
   const [token, setToken] = useState('');
 
   return (

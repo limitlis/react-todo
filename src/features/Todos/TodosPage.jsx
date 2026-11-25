@@ -1,22 +1,45 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import TodoForm from './TodoForm.jsx';
 import TodoList from './TodoList/TodoList.jsx'
+import SortBy from '@/shared/SortBy.jsx';
+import useDebounce from '@/utils/useDebounce.js';
+import FilterInput from '@/shared/FilterInput.jsx';
 
 export default function TodosPage({ token }) {
-
     const [todoList, setTodoList] = useState([]);
+    const [sortBy, setSortBy] = useState('createdAt');
+    const [sortDirection, setSortDirection] = useState('desc');
+
+    const [filterTerm, setFilterTerm] = useState('');
+    const debouncedFilterTerm = useDebounce(filterTerm, 300); 
+
     const [error, setError] = useState('');
+    const [filterError, setFilterError] = useState('');
     const [isTodoListLoading, setIsTodoListLoading] = useState(false);
 
+    const handleFilterChange = (newTerm) => { setFilterTerm(newTerm); };
+
+    const [dataVersion, setDataVersion] = useState(0);
+    
+    const invalidateCache = useCallback(() => {
+        setDataVersion((prev) => prev + 1);
+    }, []);
     useEffect(() => {
         if (!token) return;
-        let dataFetched = false;
+        // prefixing with `_` due to linter
+        let _dataFetched = false;
         (async function fetchTodos() {
             setIsTodoListLoading(true);
             try {
-                const params = new URLSearchParams({
-                    limit: 99,
-                });
+                const paramsObject = {
+                    sortBy,
+                    sortDirection,
+                    limit: 100,
+                }
+                if (debouncedFilterTerm) {
+                   paramsObject.find = debouncedFilterTerm;
+                }
+                const params = new URLSearchParams(paramsObject);
                 const response = await fetch(`/api/tasks?${params}`, {
                     headers: {
                         'X-CSRF-TOKEN': token,
@@ -24,8 +47,10 @@ export default function TodosPage({ token }) {
                     credentials: 'include',
                 });
                 if (response.ok) {
-                    const { tasks, pagination } = await response.json();
+                    // prefixing pagination as `_pagination` due to linter
+                    const { tasks, _pagination } = await response.json();
                     setTodoList(tasks);
+                    setFilterError('');
                 } else {
                     if (response.status === 401) {
                         throw new Error('unauthorized');
@@ -35,15 +60,19 @@ export default function TodosPage({ token }) {
                     }
                 }
             } catch (error) {
-                setError(error.message);
+                if (debouncedFilterTerm || sortBy !== 'createdAt' || sortDirection !== 'desc') {
+                    setFilterError(`Error filtering/sorting todos: ${error.message}`);
+                } else {
+                    setError(`Error fetching todos: ${error.message}`);
+                }
             } finally {
                 setIsTodoListLoading(false);
             }
         })();
         return () => {
-            dataFetched = true;
+            _dataFetched = true;
         }
-    }, [token]);
+    }, [token, sortBy, sortDirection, debouncedFilterTerm]);
     
     async function addTodo(todoTitle) {
         if (todoTitle?.length) {
@@ -56,6 +85,7 @@ export default function TodosPage({ token }) {
 
             setTodoList((previous) => [newTodo, ...previous]);
             try {
+                // oxlint-disable-next-line no-unused-vars
                 const { id, ...payload } = newTodo;
                 const response = await fetch(`/api/tasks`, {
                     method: 'POST',
@@ -75,6 +105,8 @@ export default function TodosPage({ token }) {
                         const previousResults = previous.filter((todo) => todo.id !== tmpID);
                         return [task, ...previousResults];
                     });
+                    invalidateCache();
+                    setFilterError('');
                 } else {
                     const errorBody = await response.json();
                     throw new Error(errorBody.message);
@@ -115,6 +147,7 @@ export default function TodosPage({ token }) {
                 const errorBody = await response.json();
                 throw new Error(errorBody.message);
             }
+            invalidateCache();
             
         } catch (error) {
             setError(error.message);
@@ -155,6 +188,7 @@ export default function TodosPage({ token }) {
                 const errorBody = await response.json();
                 throw new Error(errorBody.message);
             }
+            invalidateCache();
         } catch (error) {
             setError(error.message);
             setTodoList(
@@ -168,6 +202,14 @@ export default function TodosPage({ token }) {
         }
     }
 
+    function resetFilters(e) {
+        e.preventDefault();
+        setFilterTerm('');
+        setSortBy('createdAt');
+        setSortDirection('desc');
+        setFilterError('');
+    }
+
     return (
         <div>
             {   error !== '' ? <div className="alert alert-error">
@@ -175,9 +217,20 @@ export default function TodosPage({ token }) {
                 <button className="alert-close" aria-label="Close" onClick={() => setError('')}>&times;</button>
             </div> : ''
             }
-            { isTodoListLoading ? <div aria-busy="true" style={{minHeight: '2rem'}}></div> : '' }
+            {
+                filterError != '' && <div className="alert alert-error">
+                    <p>
+                        {filterError}
+                        <a className="secondary" onClick={(e) => resetFilters(e)} style={{marginLeft: '10px'}}>Reset Filters</a>
+                    </p>
+                <button className="alert-close" aria-label="Close" onClick={() => setFilterError('')}>&times;</button>
+            </div>
+            }
+            {isTodoListLoading ? <div aria-busy="true" style={{ minHeight: '2rem' }}></div> : ''}
+            <SortBy sortBy={sortBy} sortDirection={sortDirection} onSortByChange={setSortBy} onSortDirectionChange={setSortDirection} />
+            <FilterInput filterTerm={filterTerm} onFilterChange={handleFilterChange}/>
             <TodoForm onAddTodo={addTodo} /> 
-            <TodoList todoList={todoList} onUpdateTodo={updateTodo} onCompleteTodo={completeTodo} />
+            <TodoList todoList={todoList} onUpdateTodo={updateTodo} onCompleteTodo={completeTodo} dataVersion={dataVersion} />
         </div>
     )
 }
